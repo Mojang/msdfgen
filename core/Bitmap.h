@@ -8,6 +8,11 @@ struct FloatRGB {
     float r, g, b;
 };
 
+/// A floating point RGBA pixel.
+struct FloatRGBA {
+	float r, g, b, a;
+};
+
 /// A 2D image bitmap.
 template <typename T>
 class Bitmap {
@@ -30,6 +35,9 @@ public:
     int height() const;
     T & operator()(int x, int y);
     const T & operator()(int x, int y) const;
+
+	// Clone into a bitmap starting at x, y as the upper left of the blit
+    void CopyInto(int x, int y, Bitmap<T>& source);
 
 private:
     T *content;

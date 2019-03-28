@@ -7,7 +7,8 @@ namespace msdfgen {
 class SignedDistance {
 
 public:
-    static const SignedDistance INFINITE;
+	// Certain platforms apparently don't like INFINITE, So, renamed to INFINITE_SIGNED_DISTANCE
+    static const SignedDistance INFINITE_SIGNED_DISTANCE;
 
     double distance;
     double dot;

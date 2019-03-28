@@ -71,7 +71,17 @@ const T & Bitmap<T>::operator()(int x, int y) const {
     return content[y*w+x];
 }
 
+template <typename T>
+void Bitmap<T>::CopyInto(int x, int y, Bitmap<T>& source) {
+	for (int sourcey=0; sourcey<source.height(); sourcey++)
+		for (int sourcex = 0; sourcex < source.width(); sourcex++) {
+			content[(h - y - (source.height() - sourcey)) * w + x + sourcex] = source(sourcex, sourcey);
+
+	}
+}
+
 template class Bitmap<float>;
 template class Bitmap<FloatRGB>;
+template class Bitmap<FloatRGBA>;
 
 }

@@ -1,15 +1,7 @@
 
 #include "import-font.h"
 
-#include <cstdlib>
 #include <queue>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-
-#ifdef _WIN32
-    #pragma comment(lib, "freetype.lib")
-#endif
 
 namespace msdfgen {
 
@@ -123,16 +115,16 @@ bool getFontWhitespaceWidth(double &spaceAdvance, double &tabAdvance, FontHandle
     return true;
 }
 
-bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance) {
-    if (!font)
-        return false;
-    FT_Error error = FT_Load_Char(font->face, unicode, FT_LOAD_NO_SCALE);
+bool loadGlyph(Shape &output, FT_Face fontFace, int unicode, double *advance) {
+    FT_Error error = FT_Load_Char(fontFace, unicode, FT_LOAD_NO_SCALE);
     if (error)
         return false;
     output.contours.clear();
     output.inverseYAxis = false;
+
+	// Don't assume 64 height.  Use the ascender/descender here
     if (advance)
-        *advance = font->face->glyph->advance.x/64.;
+        *advance = static_cast<double>(fontFace->glyph->advance.x)/(fontFace->ascender - fontFace->descender);
 
     FtContext context = { };
     context.shape = &output;
@@ -143,10 +135,18 @@ bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance) {
     ftFunctions.cubic_to = &ftCubicTo;
     ftFunctions.shift = 0;
     ftFunctions.delta = 0;
-    error = FT_Outline_Decompose(&font->face->glyph->outline, &ftFunctions, &context);
+    error = FT_Outline_Decompose(&fontFace->glyph->outline, &ftFunctions, &context);
     if (error)
         return false;
     return true;
+}
+
+bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance) {
+	if (!font->face) {
+		return false;
+	}
+
+	return loadGlyph(output, font->face, unicode, advance);
 }
 
 bool getKerning(double &output, FontHandle *font, int unicode1, int unicode2) {
